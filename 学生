@@ -1,0 +1,538 @@
+
+#include<stdio.h>
+#include <string.h>
+#include <stdlib.h>
+//#include <conio.h>
+//#pragma warning(disable:4996)
+
+//成绩结构体
+struct score
+{
+	char snum[9];
+	char sname[11];//姓名
+	int gdsx;//高等数学
+	int dxyy;//大学英语
+	int cxsj;//程序设计
+	int chxgl;//测绘学概论
+	int dqxtkx;//地球系统科学
+	int sumcj;//成绩总数
+	int rank;//排名
+};
+
+void showmenu(void);//菜单
+int xg(int n);//修改成绩
+void lr(int n);//录入成绩
+void xhcx(int n);//学号查询
+void xmcx(int n);//姓名查询
+void allrankcx(int n);//排名查询
+void xs(int n);//成绩显示
+void jspm(int n);//计算排名
+int sc(int n);//删除成绩
+void bccj();//保存成绩并退出
+void bccj1();
+
+int main()
+{
+	int choice, n = 0, count = 0;//n表示录入的人数；count计数,当前总人数
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "a+");//a+：打开已存在的文件时，光标位于文件尾，读数据时，光标回到开头
+	if (fp == NULL)
+	{
+		printf("打开文件失败,请重试！\n");
+		//getch();
+		fclose(fp);//关闭文件
+		exit(0);//退出
+	}
+	int c = 0;
+	while (!feof(fp))
+	{
+		char cc = fgetc(fp);
+		if (cc == EOF)
+		{
+			break;
+		}
+		//输出字符
+// putchar(cc);
+		c++;
+	}
+	count = c / 14;
+	// printf("%d", count);
+	//int p = _getch();
+	fclose(fp);
+
+	do
+	{
+		showmenu();
+		scanf_s("%d", &choice);//选择操作
+		switch (choice)
+		{
+		case 1:
+			system("cls");//清屏
+			printf("请输入您要录入的人数：");
+			scanf_s("%d", &n);
+			lr(n);//录入
+			count += n;
+			break;
+		case 2:
+			system("cls");
+			xmcx(count);
+			break;//姓名查询
+		case 3:
+			system("cls");
+			xhcx(count);
+			break;//学号查询
+		case 4:
+			system("cls");
+			printf("请输入您再要录入的人数：");
+			scanf_s("%d", &n);
+			lr(n);//录入
+			count += n;
+			break;
+		case 5:
+			system("cls");
+			count = sc(count); //删除学生成绩
+			break;
+		case 6:
+			system("cls");
+			xs(count);//显示学生成绩
+			break;
+		case 7:
+			system("cls");
+			bccj1();//保存
+			break;
+		case 8:
+			system("cls");
+			allrankcx(count);//成绩排名
+			break;
+		case 9:
+			system("cls");
+			xg(count);//修改
+			break;
+
+		case 0:
+			system("cls");
+			bccj(); //退出
+			break;
+		default:printf("输入错误，请重试！\n");// getch();
+		}
+	} while (choice != 0);
+	//int p = _getch();
+	return 0;
+}
+
+void showmenu()//菜单
+{
+	printf("\t                    欢迎您使用学生成绩管理系统\n");
+	printf("\n");
+	printf("\t   ************************************************************\n");
+	printf("\t   *  1    \t   读入学生成绩                           *\n");
+	printf("\t   *  2    \t   按照姓名查询                           *\n");
+	printf("\t   *  3    \t   按照学号查询                           *\n");
+	printf("\t   *  4    \t   添加学生成绩                           *\n");
+	printf("\t   *  5    \t   删除学生信息                           *\n");
+	printf("\t   *  6    \t   课程及格率分布                         *\n");
+	printf("\t   *  7    \t   保存学生成绩                           *\n");
+	printf("\t   *  8    \t   展示成绩排名                           *\n");
+	printf("\t   *  9    \t   修改学生成绩                           *\n");
+	printf("\t   *  0    \t   退出成绩系统                           *\n");
+	printf("\t   *  请选择：                                                *\n");
+	printf("\t   ************************************************************\n");
+	return;
+}
+
+//1.录入成绩
+void lr(int n)
+{
+	struct score stu[100];
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "a+");
+	if (fp == NULL)
+	{
+		printf("打开文件失败,请重试！\n");
+		//int p = _getch();
+		fclose(fp);
+		exit(0);
+	}
+	printf("请输入全部学生的学号，姓名，高等数学成绩，大学英语成绩，程序设计成绩，测绘学概论成绩，地球系统科学成绩；\n");
+	for (int i = 0; i < n; i++)
+	{
+		printf("第%d个学生\n", i + 1);
+		printf("学号： 姓名： 高等数学： 大学英语： 程序设计： 测绘学： 地球系统： ");
+		scanf_s("%s %s %d %d %d %d %d", stu[i].snum, 8, stu[i].sname, 9, &stu[i].gdsx, &stu[i].dxyy, &stu[i].cxsj, &stu[i].chxgl, &stu[i].dqxtkx);
+
+		stu[i].sumcj = 0;
+		stu[i].rank = 0;
+		//写入数据
+		fprintf(fp, "%s %s %d %d %d %d %d %d %d\n", stu[i].snum, stu[i].sname, stu[i].gdsx, stu[i].dxyy, stu[i].cxsj, stu[i].chxgl, stu[i].dqxtkx, stu[i].sumcj, stu[i].rank);
+	}
+	fclose(fp);
+	printf("添加学生成功,请按任意键返回\n");
+	//_getch();
+	system("cls");//清屏
+}
+//2.姓名查询
+void xmcx(int n)
+{
+	struct score stu[100];
+	char sname[11];
+	printf("请输入你要查询学生的姓名：");
+	scanf_s("%s", sname, 2);
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "r");
+	if (fp == NULL)
+	{
+		printf("打开文件失败！\n");
+		//_getch();
+		exit(0);
+	}
+	int c = 0;
+	while (!feof(fp)) {
+		fscanf_s(fp, "%s %s %d %d %d %d %d %d %d\n\n", stu[c].snum, 9, stu[c].sname, 11, &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx, &stu[c].sumcj, &stu[c].rank);
+		c++;
+	}
+	int i;
+	for (i = 0; i < n; i++)
+	{
+		if (strcmp(sname, stu[i].sname) == 0)
+		{
+			printf("学号\t姓名\t高等数学\t大学英语\t程序设计\t测绘学概论\t地球系统科学\t总分\t名次\n");
+			printf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t\n", stu[i].snum, stu[i].sname, stu[i].gdsx, stu[i].dxyy, stu[i].cxsj, stu[i].chxgl, stu[i].dqxtkx, stu[i].sumcj, stu[i].rank);
+			printf("按任意键返回\n");
+			//getch();
+			fclose(fp);
+			return;
+		}
+	}
+	printf("未找到要查询学生的成绩，请重试！\n");
+	//getch();
+	fclose(fp);
+	return;
+}
+//3.学号查询
+void xhcx(int n)
+{
+	struct score stu[100];
+	char snum[9];
+	printf("请输入你要查询学生的学号：");
+	scanf_s("%s", snum, 2);
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "r");
+	if (fp == NULL)
+	{
+		printf("打开文件失败！\n");
+		//getch();
+		exit(0);
+	}
+	int c = 0;
+	while (!feof(fp)) {
+
+		fscanf_s(fp, "%s %s %d %d %d %d %d %d %d\n", stu[c].snum, 9, stu[c].sname, 11, &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx, &stu[c].sumcj, &stu[c].rank);
+		c++;
+	}
+	int i;
+	for (i = 0; i < n; i++)
+	{
+		if (strcmp(snum, stu[i].snum) == 0)
+		{
+			printf("学号\t姓名\t高等数学\t大学英语\t程序设计\t测绘学概论\t地球系统科学\t总分\t名次\n");
+			printf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", stu[i].snum, stu[i].sname, stu[i].gdsx, stu[i].dxyy, stu[i].cxsj, stu[i].chxgl, stu[i].dqxtkx, stu[i].sumcj, stu[i].rank);
+			printf("按任意键返回\n");
+			//getch();
+			fclose(fp);
+			return;
+		}
+	}
+	printf("未找到要查询学生的成绩，请重试！\n");
+	//getch();
+	system("cls");
+	fclose(fp);
+	return;
+}
+
+//5.删除成绩
+int sc(int n)
+{
+	struct score stu[100];
+	struct score sub[99];//删除后的结构体数组
+	char stnum[9];//学号
+	int find = 0;
+	printf("请输入你要删除的学生学号:");
+	scanf_s("%s", stnum, 2);
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "a+");
+	if (fp == NULL)
+	{
+		printf("打开文件失败,请联系管理员\n");
+		//getch();
+		return -1;
+	}
+	int c = 0;
+	int index = 0;//用于记录目标序号
+	while (!feof(fp))//不为空
+	{
+		fscanf_s(fp, "%s %s %d %d %d %d %d %d %d\n", stu[c].snum, 9, stu[c].sname, 11, &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx, &stu[c].sumcj, &stu[c].rank);
+		if (strcmp(stnum, stu[c].snum) == 0)
+		{
+			find = 1;//根据学号查找，找到赋值为1
+			index = c;//记录编号
+		}
+		c++;
+	}
+	fclose(fp);
+	if (n == 0)
+	{
+		printf("已经没有学生成绩信息了,请按任意键返回\n");
+		//getch();
+		showmenu();
+		return n;
+	}
+	if (find == 0)
+	{
+		printf("没有该学生成绩信息,请按任意键返回\n");
+		//getch();
+		showmenu();
+		return n;
+	}
+	else
+	{
+		int i = 0;//删除
+		for (i = 0; i < c; i++)
+		{
+			if (i < index)
+			{
+				sub[i] = stu[i];
+			}
+			else
+			{
+				sub[i] = stu[i + 1];
+			}
+		}
+
+		const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+		int error_in = fopen_s(&fp, path, "w");
+		//写入数据
+		for (i = 0; i < c - 1; i++)
+		{
+			fprintf(fp, "%s %s %d %d %d %d %d %d %d\n", sub[i].snum, sub[i].sname, sub[i].gdsx, sub[i].dxyy, sub[i].cxsj, sub[i].chxgl, sub[i].dqxtkx, sub[i].sumcj, sub[i].rank);
+		}
+		fclose(fp);
+		printf("学号为%s的学生成绩删除成功,请按任意键返回\n", stnum);
+		//getch();
+		showmenu();
+		system("cls");
+		return n - 1;
+	}
+}
+
+
+//8.全班排名查询
+void allrankcx(int n)
+{
+	struct score stu[100];
+	struct score temp;
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "r");
+	if (fp == NULL)
+	{
+		printf("打开文件失败！\n");
+		//getch();
+		exit(0);
+	}
+	int c = 0;
+	while (!feof(fp)) {
+
+		fscanf_s(fp, "%s %s %d %d %d %d %d %d %d\n", stu[c].snum, 9, stu[c].sname, 11, &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx, &stu[c].sumcj, &stu[c].rank);
+		c++;
+	}
+	int i, j;
+	for (i = 0; i < n; i++)
+	{
+		if (stu[i].rank == 0) {
+
+			printf("请先进行成绩计算进行排名！！\n");
+			//getch();
+			fclose(fp);
+			return;
+		}
+		stu[i].sumcj = stu[i].gdsx + stu[i].dxyy + stu[i].cxsj + stu[i].chxgl + stu[i].dqxtkx;
+		//冒泡排序
+		for (i = 0; i < n - 1; i++) {
+			//每一轮比较前 n-1-i 个，也就是说，已经排序好的最后 i 个不用比较
+			for (j = 0; j < n - 1 - i; j++)
+			{
+				if (stu[j].sumcj > stu[j + 1].sumcj)
+				{
+					temp = stu[j];
+					stu[j] = stu[j + 1];
+					stu[j + 1] = temp;
+				}
+			}
+		}
+		printf("学号\t姓名\t高等数学\t大学英语\t程序设计\t测绘学概论\t地球系统科学\t总分\t名次\n");
+		for (i = 0; i < n; i++)
+		{
+			printf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", stu[i].snum, stu[i].sname, stu[i].gdsx, stu[i].dxyy, stu[i].cxsj, stu[i].chxgl, stu[i].dqxtkx, stu[i].sumcj, stu[i].rank);
+		}
+		printf("按任意键返回\n");
+		//getch();
+		fclose(fp);
+		return;
+	}
+	printf("查询失败，请重试！\n");
+	//getch();
+	fclose(fp);
+	return;
+}
+//5计算排名函数
+void jspm(int n)
+{
+	struct score stu[100];
+	int  j, temp;
+	int i = 0;
+	int count;
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "r");
+	if (fp == NULL)
+	{
+		printf("打开文件失败！\n");
+		//getch();
+		exit(0);
+	}
+	int c = 0;
+	while (!feof(fp))
+	{
+		fscanf_s(fp, "%s %s %d %d %d %d %d %d %d\n", stu[c].snum, 9, stu[c].sname, 11, &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx, &stu[c].sumcj, &stu[c].rank);
+		stu[i].sumcj = stu[i].gdsx + stu[i].dxyy + stu[i].cxsj + stu[i].chxgl + stu[i].dqxtkx;
+		c++;
+	}
+	fclose(fp);
+	//计算排名并存储
+	for (i = 0; i < n; i++)
+	{
+		temp = 1;//第1名
+		for (j = 0; j < n; j++)
+		{
+			if (stu[i].sumcj < stu[j].sumcj) temp++;//如果较小，排名下降1名
+		}
+		stu[i].rank = temp;
+	}
+	//更新记录
+	error_in = fopen_s(&fp, path, "w");
+	for (i = 0; i < n; i++)
+	{
+		fprintf(fp, "%s %s %d %d %d %d %d %d %d\n", stu[c].snum, stu[c].sname, stu[c].gdsx, stu[c].dxyy, stu[c].cxsj, stu[c].chxgl, stu[c].dqxtkx, stu[c].sumcj, stu[c].rank);
+	}
+	fclose(fp);
+	printf("数据重新计算和排名成功,请按任意键返回主菜单。\n");
+	//getch();
+	return;
+}
+//6显示成绩信息
+void xs(int n)
+{
+	struct score stu[100];
+	int i;
+	printf("成绩信息如下：\n");
+	FILE* fp = NULL;
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "r");
+	if (fp == NULL)
+	{
+		printf("打开文件失败,请重试！\n");
+		//getch();
+		fclose(fp);
+		exit(0);
+	}
+	printf("学号\t姓名\t高等数学\t大学英语\t程序设计\t测绘学概论\t地球系统科学\t总分\t名次\n");
+	int c = 0;
+	while (!feof(fp))
+	{
+		fscanf_s(fp, "%s %s %d %d %d %d %d %d %d\n", stu[c].snum, 9, stu[c].sname, 11, &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx, &stu[c].sumcj, &stu[c].rank);
+		c++;
+	}
+	if (n != 0) {
+		//人数不为0
+		for (i = 0; i < c; i++)
+		{
+			printf("%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", stu[i].snum, stu[i].sname, stu[i].gdsx, stu[i].dxyy, stu[i].cxsj, stu[i].chxgl, stu[i].dqxtkx, stu[i].sumcj, stu[i].rank);
+		}
+	}
+	fclose(fp);
+	printf("显示完毕 ,请按任意键返回\n");
+	//getch();
+	return;
+}
+//9.修改成绩
+int xg(int n)
+{
+	struct score stu[100];
+	FILE* fp;
+	char stnum[9];
+	int find = 0;
+	printf("请输入要修改的学生学号:");
+	scanf_s("%s", stnum, 2);
+	const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+	int error_in = fopen_s(&fp, path, "r");
+	if (fp == NULL)
+	{
+		printf("文件打开失败\n");
+		//getch();
+		return -1;
+	}
+	int c = 0;
+	while (!feof(fp))
+	{
+		fscanf_s(fp, "%s %s %d %d %d %d %d %d %d\n", stu[c].snum, 9, stu[c].sname, 11, &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx, &stu[c].sumcj, &stu[c].rank);
+		if (strcmp(stnum, stu[c].snum) == 0)
+		{
+			find = 1;
+			printf("高等数学：  大学英语：   程序设计：   测绘学：   地球系统：   ");
+			scanf_s("%d %d %d %d %d", &stu[c].gdsx, &stu[c].dxyy, &stu[c].cxsj, &stu[c].chxgl, &stu[c].dqxtkx);
+		}
+		c++;
+	}
+	fclose(fp);
+	if (find == 0)
+	{
+		printf("没有找到要删除的学生记录,请按任意键退出\n");
+		//getch();
+	}
+	else
+	{
+		const char* path = "C:\\Users\\86191\\Desktop\\grade.rtf";
+		int error_in = fopen_s(&fp, path, "w");
+		int i;
+		for (i = 0; i < n; i++)
+		{
+			//更新数据
+			fprintf(fp, "%s %s %d %d %d %d %d %d %d\n", stu[i].snum, stu[i].sname, stu[i].gdsx, stu[i].dxyy, stu[i].cxsj, stu[i].chxgl, stu[i].dqxtkx, stu[i].sumcj, stu[i].rank);
+		}
+		fclose(fp);
+		printf("学号为%s同学的成绩已经修改成功,请按任意键返回", stnum);
+		//getch();
+	}
+	showmenu();
+	system("cls");
+	return 1;
+}
+//0保存信息并退出系统
+void bccj()
+{
+	printf("感谢您的使用，欢迎下次使用!\n");
+	//getch();
+	return;
+}
+void bccj1()
+{
+
+	printf("成绩已保存!\n");
+	//getch();
+	return;
+}
